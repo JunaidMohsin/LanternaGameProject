@@ -7,10 +7,14 @@ import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Field {
     //main function calling the actual game.
     public static void main(String[] args) {
+
+
         try {
             startGame();
         } catch (IOException | InterruptedException e) {
@@ -24,24 +28,38 @@ public class Field {
 
     //Starting game.
     private static void startGame() throws IOException, InterruptedException {
+
+        int noRocks = 6;
+
         Terminal terminal = createTerminal();
 
         Player player = createPlayer();
 
         //Obstacles
+        List<Obstacle> rocklist = new ArrayList<>();
+        int px = ThreadLocalRandom.current().nextInt(45,55);
+        int py =  ThreadLocalRandom.current().nextInt(2,60);
+        rocklist.add(new Obstacle(35,5,'*'));
+        rocklist.add(new Obstacle(40,15,'*'));
+        rocklist.add(new Obstacle(45,8,'*'));
+        rocklist.add(new Obstacle(55,20,'*'));
+        rocklist.add(new Obstacle(50,10,'*'));
 
-        drawCharacters(terminal, player);
+        //Obstacle rock = new Obstacle(40,30,'*');
+
+        //drawCharacters(terminal, player);
 
         do {
-            KeyStroke keyStroke = getUserKeyStroke(terminal);
+            KeyStroke keyStroke = getUserKeyStroke(terminal, rocklist);//moving obstacle inside this function
 
             movePlayer(player, keyStroke);
-
-            //moveObstacle...
-
-            drawCharacters(terminal, player /*, Obstacle */);
-
-        } while (isPlayerAlive(player,/*, Obstacle */));
+       //     rock.scrollLeft();
+      //      drawObstacle(terminal,rock);
+            drawPlayer(terminal,player);
+        //    Thread.sleep(100);
+           // for(int i = 0; i < noRocks; i++) {
+            //}
+        } while (isPlayerAlive(player,rocklist));
 
 
     }
@@ -49,24 +67,28 @@ public class Field {
 
     //Created player
     private static Player createPlayer() {
-        return new Player(10, 10, '\u27c1');
+        return new Player(20, 14, '\u27c1');
     }
 
     //jumpfunction. Default?
     private static void movePlayer(Player player, KeyStroke keyStroke) {
-        switch (keyStroke.getKeyType()) {
-            case ArrowUp:
-                player.moveUp();
+        if(keyStroke != null) {
+            switch (keyStroke.getKeyType()) {
+                case ArrowUp:
+                    player.jump();
+                    break;
+            case ArrowDown:
+                player.gravity();
                 break;
-//            case ArrowDown:
-//                player.moveDown();
-//                break;
 //            case ArrowLeft:
 //                player.moveLeft();
 //                break;
 //            case ArrowRight:
 //                player.moveRight();
 //                break;
+                default:
+                    break;
+            }
         }
     }
 
@@ -79,27 +101,69 @@ public class Field {
     }
 
     //Method for keystroke. Jumpfunktion and moving object.
-    private static KeyStroke getUserKeyStroke(Terminal terminal) throws InterruptedException, IOException {
+    private static KeyStroke getUserKeyStroke(Terminal terminal, List<Obstacle> rocks) throws InterruptedException, IOException {
         KeyStroke keyStroke;
         long i = 0;
-        do {
-            Thread.sleep(5);
+       // do {
+            Thread.sleep(10);
             keyStroke = terminal.pollInput();
-            if(i%100 ==0){
+            if(i%10000==0){
                 //move obstacle function.
+                for(Obstacle rock : rocks){
+                rock.scrollLeft();
+                drawObstacle(terminal,rock);
+                }
             }
             i++;
-        } while (keyStroke == null);
+      //  } while (keyStroke == null);
         return keyStroke;
     }
 
     //Checking for collition.
-    private static boolean isPlayerAlive(Player player, List<Monster> monsters) {
-        for (Monster monster : monsters) {
-            if (monster.getX() == player.getX() && monster.getY() == player.getY()) {
+    private static boolean isPlayerAlive(Player player, List<Obstacle> rocks) {
+        for(Obstacle rock : rocks) {
+            if (rock.getX() == player.getX() && rock.getY() == player.getY()) {
                 return false;
             }
         }
+
         return true;
     }
+
+    private static void drawObstacle(Terminal terminal, Obstacle rock) throws IOException{
+
+        terminal.setCursorPosition(rock.getOldX(), rock.getOldY());
+        terminal.putCharacter(' ');
+        terminal.setCursorPosition(rock.getX(), rock.getY());
+        terminal.putCharacter(rock.getSymbolObstacle());
+        terminal.flush();
+    }
+
+    private static void drawPlayer(Terminal terminal, Player player) throws IOException{
+
+        terminal.setCursorPosition(player.getOldx(), player.getOldy());
+        terminal.putCharacter(' ');
+        terminal.setCursorPosition(player.getX(), player.getY());
+        terminal.putCharacter(player.getSymbol());
+
+        terminal.flush();
+
+    }
 }
+
+
+/**
+ *          movePlayer(player, keyStroke);
+ *        //     rock.scrollLeft();
+ *       //      drawObstacle(terminal,rock);
+ *             drawPlayer(terminal,player);
+ *             Thread.sleep(100);
+ *            // for(int i = 0; i < noRocks; i++) {
+ *                 int px = ThreadLocalRandom.current().nextInt(45,55);
+ *                 int py =  ThreadLocalRandom.current().nextInt(60);
+ *                 System.out.println("this is x "+px+" this is y "+py);
+ *                 rocklist.add(new Obstacle(px, py, '*'));
+ *                 if(rocklist.size() >= 10)
+ *                     rocklist.remove(9);
+ *             //}
+ */

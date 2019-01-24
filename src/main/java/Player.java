@@ -8,8 +8,6 @@ public class Player {
 
 //this is for jump logic
     private int jumpSpeed;
-    private int gravity;
-
 
     public int getJumpSpeed() {
         return jumpSpeed;
@@ -64,22 +62,22 @@ public class Player {
         this.x = x;
         this.y = y;
         this.symbol = symbol;
+        this.jumpSpeed = 1;
     }
 
-    //for jump implementation
-    public double getGravity() {
-        return gravity;
-    }
 
-    public void setGravity(int gravity) {
-        this.gravity = gravity;
-    }
 
     public void jump(){
-        jumpSpeed = -10;
-        gravity = 1;
-
+        oldx = x;
+        oldy = y;
         y = y - jumpSpeed;
+
+    }
+
+    public void gravity(){
+            oldx = x;
+            oldy = y;
+            y = y + jumpSpeed;
     }
 
 }
