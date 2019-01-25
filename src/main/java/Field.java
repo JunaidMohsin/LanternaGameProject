@@ -10,10 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.Scanner;
 
 public class Field {
-
     //main function calling the actual game.
     public static void main(String[] args) {
 
@@ -31,45 +29,81 @@ public class Field {
 
     //Starting game.
     private static void startGame() throws IOException, InterruptedException {
+
+
+        boolean isAlive = true;
+
         MP3Player m = new MP3Player();
         m.play("Victory.mp3");
 
         Terminal terminal = createTerminal();
-
+        //we decide level
         int chosenLevel = Menu.menu(terminal);
+
         terminal.clearScreen();     //Menu is removed after level is chosen and the game starts.
 
 
         int noRocks = 10*chosenLevel;
-
         System.out.println("Amount of enemies: "+ noRocks);
 
         Player player = createPlayer();
+        //for score
+        int score = 0;
+        String msg1 = "Score: ";
+        String msg2 = "FINAL SCORE: ";
 
         //Obstacles
         List<Obstacle> rocklist = new ArrayList<>();
         for(int i = 0; i <noRocks; i++){
-            rocklist.add(new Obstacle(ThreadLocalRandom.current().nextInt(30,70),ThreadLocalRandom.current().nextInt(1,21),'*'));
+            rocklist.add(new Obstacle(ThreadLocalRandom.current().nextInt(30,70),ThreadLocalRandom.current().nextInt(1,21),'\u0464'));
         }
 
-        //Obstacle rock = new Obstacle(40,30,'*');
-
-        //drawCharacters(terminal, player);
+        //int px = 20;
+       // int py = 20;
 
         do {
+
+                score += 1;
+
+            // just to check how lanterna terminal prints a shape
+         /*   terminal.setCursorPosition(px, py);
+            terminal.putCharacter('o');
+
+            terminal.setCursorPosition(px-1, py-1);
+            terminal.putCharacter('Y');
+
+            terminal.setCursorPosition(px+1, py+1);
+            terminal.putCharacter('X');
+
+            terminal.setCursorPosition(50, 50);
+            terminal.putCharacter('D');*/
+
             KeyStroke keyStroke = getUserKeyStroke(terminal, rocklist);//moving obstacle inside this function
 
             movePlayer(player, keyStroke);
-       //     rock.scrollLeft();
-      //      drawObstacle(terminal,rock);
+
+
             drawPlayer(terminal,player);
-        //Thread.sleep(5);
-           // for(int i = 0; i < noRocks; i++) {
-            //}
-        } while (isPlayerAlive(player,rocklist));
+           // drawPlayerShape(terminal,player);
+
+            /* for shape player
+           for(Obstacle rock : rocklist) {
+               isAlive = isPlayerShapeAlive(player, rock);
+               if(isAlive == false)
+                   break;
+          }
+           */
+            //System.out.println(score);
+            if(score%5 == 0){
+                drawScore(terminal,score,msg1);
+            }
+        } while (isPlayerAlive(player,rocklist)); //while(isAlive);//
+
         //Before printing GAME OVER!!!, Clear the screen
         terminal.clearScreen();
 
+        //update score to screen
+        drawScore(terminal,score,msg2);
         //m.play("Blues-Loop.mp3");
         //Logic to print GAME OVER!!! on lanterna terminal
         String str = "GAME OVER!!!!!";
@@ -83,14 +117,12 @@ public class Field {
             col++;
         }
         terminal.flush();
-
-
     }
 
 
     //Created player
     private static Player createPlayer() {
-        return new Player(10, 14, '\u27c1');
+        return new Player(10, 14, '\u058E');
     }
 
     //jumpfunction. Default?
@@ -123,14 +155,14 @@ public class Field {
         return terminal;
     }
 
-    //Method for keystroke. Jumpfunktion and moving object.
+    //Method for keystroke. Jump funktion and moving object.
     private static KeyStroke getUserKeyStroke(Terminal terminal, List<Obstacle> rocks) throws InterruptedException, IOException {
         KeyStroke keyStroke;
         long i = 0;
        // do {
             Thread.sleep(30);
             keyStroke = terminal.pollInput();
-            if(i%50==0){
+            if(i%10000==0){
                 //move obstacle function.
                 for(Obstacle rock : rocks){
                 rock.scrollLeft();
@@ -156,6 +188,18 @@ public class Field {
     }
 
 
+    private static boolean isPlayerShapeAlive(Player player, Obstacle rock) {
+
+        if( (rock.getX() <= player.getX()+1) && (rock.getX() >= player.getX()-1) && (rock.getY() <= player.getY()+1) && (rock.getY() >= player.getY()-1))
+        {
+            MP3Player m = new MP3Player();
+            m.play("Blues-Loop.mp3", true);
+            return false;
+        }
+
+        return true;
+    }
+
     private static void drawObstacle(Terminal terminal, Obstacle rock) throws IOException{
 
         terminal.setCursorPosition(rock.getOldX(), rock.getOldY());
@@ -179,7 +223,52 @@ public class Field {
 
     }
 
+    private static void drawObstacleShape(Terminal terminal, Obstacle rock) throws IOException{
 
+        for(int i = -1; i <= 1; i++){
+            for(int j = -1; j <= 1; j++){
+                terminal.setCursorPosition(rock.getOldX()+i,rock.getOldY()+j);
+                terminal.putCharacter(' ');
+            }
+        }
+        for(int i = -1; i <= 1; i++){
+            for(int j = -1; j <= 1; j++){
+                terminal.setCursorPosition(rock.getX()+i,rock.getY()+j);
+                terminal.putCharacter(rock.getChar(i+1,j+1));
+            }
+        }
+        terminal.flush();
+
+    }
+
+    private static void drawPlayerShape(Terminal terminal, Player player) throws IOException{
+
+        for(int i = -1; i <= 1; i++){
+            for(int j = -1; j <= 1; j++){
+                terminal.setCursorPosition(player.getOldx()+i,player.getOldy()+j);
+                terminal.putCharacter(' ');
+            }
+        }
+        terminal.setForegroundColor(TextColor.ANSI.CYAN);
+        for(int i = -1; i <= 1; i++){
+            for(int j = -1; j <= 1; j++){
+                terminal.setCursorPosition(player.getX()+i,player.getY()+j);
+                terminal.putCharacter(player.getChar(i+1,j+1));
+            }
+        }
+        terminal.flush();
+
+    }
+
+    private static void drawScore(Terminal terminal,int score, String msg) throws IOException{
+        String val = msg+score;
+        terminal.setForegroundColor(TextColor.ANSI.GREEN);
+        for(int i = 0; i < val.length(); i++){
+            terminal.setCursorPosition(10+i,1);
+            terminal.putCharacter(val.charAt(i));
+        }
+        terminal.flush();
+    }
 }
 
 

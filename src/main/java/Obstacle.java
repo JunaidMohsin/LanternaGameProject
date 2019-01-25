@@ -6,6 +6,7 @@ public class Obstacle {
     private int oldX;
     private int oldY;
     private char symbolObstacle;
+    Shape obstacleBody;
 
 
     public int getOldX() {
@@ -29,6 +30,7 @@ public class Obstacle {
         this.x = x;
         this.y = y;
         this.symbolObstacle = symbolObstacle;
+     //   obstacleBody = new Shape(symbolObstacle,'\u03F9'); activate to have shape instead of char
     }
 
     public int getX() {
@@ -57,6 +59,10 @@ public class Obstacle {
             x-=1;
         }
 
+    }
+
+    public char getChar(int indX, int indY){
+        return obstacleBody.body[indX][indY];
     }
 
 

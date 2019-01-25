@@ -5,6 +5,7 @@ public class Player {
     private int oldx;
     private int oldy;
     char symbol;
+    Shape body;
 
 //this is for jump logic
     private int jumpSpeed;
@@ -63,6 +64,7 @@ public class Player {
         this.y = y;
         this.symbol = symbol;
         this.jumpSpeed = 1;
+        body = new Shape(symbol,'\u02E7');
     }
 
 
@@ -78,6 +80,10 @@ public class Player {
             oldx = x;
             oldy = y;
             y = y + jumpSpeed;
+    }
+
+    public char getChar(int indX, int indY){
+        return body.body[indX][indY];
     }
 
 }
