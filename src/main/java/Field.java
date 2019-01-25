@@ -1,3 +1,4 @@
+import com.googlecode.lanterna.SGR;
 import com.googlecode.lanterna.TextColor;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
@@ -9,8 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.Scanner;
 
 public class Field {
+
     //main function calling the actual game.
     public static void main(String[] args) {
 
@@ -29,21 +32,25 @@ public class Field {
     //Starting game.
     private static void startGame() throws IOException, InterruptedException {
 
-        int noRocks = 6;
 
         Terminal terminal = createTerminal();
+
+
+
+        int chosenLevel = Menu.menu(terminal);
+        terminal.clearScreen();     //Menu is removed after level is chosen and the game starts.
+
+        int noRocks = 10*chosenLevel;
+
+        System.out.println("Enemies: "+ noRocks);
 
         Player player = createPlayer();
 
         //Obstacles
         List<Obstacle> rocklist = new ArrayList<>();
-        int px = ThreadLocalRandom.current().nextInt(45,55);
-        int py =  ThreadLocalRandom.current().nextInt(2,60);
-        rocklist.add(new Obstacle(35,5,'*'));
-        rocklist.add(new Obstacle(40,15,'*'));
-        rocklist.add(new Obstacle(45,8,'*'));
-        rocklist.add(new Obstacle(55,20,'*'));
-        rocklist.add(new Obstacle(50,10,'*'));
+        for(int i = 0; i <noRocks; i++){
+            rocklist.add(new Obstacle(ThreadLocalRandom.current().nextInt(30,70),ThreadLocalRandom.current().nextInt(1,21),'*'));
+        }
 
         //Obstacle rock = new Obstacle(40,30,'*');
 
@@ -56,10 +63,25 @@ public class Field {
        //     rock.scrollLeft();
       //      drawObstacle(terminal,rock);
             drawPlayer(terminal,player);
-        //    Thread.sleep(100);
+        //Thread.sleep(5);
            // for(int i = 0; i < noRocks; i++) {
             //}
         } while (isPlayerAlive(player,rocklist));
+        //Before printing GAME OVER!!!, Clear the screen
+        terminal.clearScreen();
+
+        //Logic to print GAME OVER!!! on lanterna terminal
+        String str = "GAME OVER!!!!!";
+        int col = 30;
+        for (char c : str.toCharArray()){
+            terminal.setCursorPosition(col,20) ;
+            terminal.setForegroundColor(TextColor.ANSI.RED);
+            terminal.enableSGR(SGR.BOLD);
+            terminal.enableSGR(SGR.BLINK);
+            terminal.putCharacter(c);
+            col++;
+        }
+        terminal.flush();
 
 
     }
@@ -67,7 +89,7 @@ public class Field {
 
     //Created player
     private static Player createPlayer() {
-        return new Player(20, 14, '\u27c1');
+        return new Player(10, 14, '\u27c1');
     }
 
     //jumpfunction. Default?
@@ -105,9 +127,9 @@ public class Field {
         KeyStroke keyStroke;
         long i = 0;
        // do {
-            Thread.sleep(10);
+            Thread.sleep(30);
             keyStroke = terminal.pollInput();
-            if(i%10000==0){
+            if(i%50==0){
                 //move obstacle function.
                 for(Obstacle rock : rocks){
                 rock.scrollLeft();
@@ -130,6 +152,7 @@ public class Field {
         return true;
     }
 
+
     private static void drawObstacle(Terminal terminal, Obstacle rock) throws IOException{
 
         terminal.setCursorPosition(rock.getOldX(), rock.getOldY());
@@ -149,6 +172,8 @@ public class Field {
         terminal.flush();
 
     }
+
+
 }
 
 
