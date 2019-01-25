@@ -44,6 +44,9 @@ public class Field {
 
 
         int noRocks = 10*chosenLevel;
+        if(chosenLevel == 3){
+            noRocks = 10;
+        }
         System.out.println("Amount of enemies: "+ noRocks);
 
         Player player = createPlayer();
@@ -64,6 +67,10 @@ public class Field {
         do {
 
                 score += 1;
+            //System.out.println(score);
+            if(score%5 == 0){
+                drawScore(terminal,score,msg1);
+            }
 
             // just to check how lanterna terminal prints a shape
          /*   terminal.setCursorPosition(px, py);
@@ -82,29 +89,31 @@ public class Field {
 
             movePlayer(player, keyStroke);
 
-
-            drawPlayer(terminal,player);
-           // drawPlayerShape(terminal,player);
-
-            /* for shape player
-           for(Obstacle rock : rocklist) {
-               isAlive = isPlayerShapeAlive(player, rock);
-               if(isAlive == false)
-                   break;
-          }
-           */
-            //System.out.println(score);
-            if(score%5 == 0){
-                drawScore(terminal,score,msg1);
+            if(chosenLevel <= 2) {
+                drawPlayer(terminal, player);
+                isAlive = isPlayerAlive(player,rocklist);
             }
-        } while (isPlayerAlive(player,rocklist)); //while(isAlive);//
+            else {
+                drawPlayerShape(terminal, player);
+
+                for (Obstacle rock : rocklist) {
+                    isAlive = isPlayerShapeAlive(player, rock);
+                    if (isAlive == false)
+                        break;
+                }
+            }
+
+
+
+        } while (isAlive); //while(isAlive);//
+
 
         //Before printing GAME OVER!!!, Clear the screen
         terminal.clearScreen();
 
         //update score to screen
         drawScore(terminal,score,msg2);
-        //m.play("Blues-Loop.mp3");
+
         //Logic to print GAME OVER!!! on lanterna terminal
         String str = "GAME OVER!!!!!";
         int col = 30;
@@ -116,6 +125,7 @@ public class Field {
             terminal.putCharacter(c);
             col++;
         }
+        m.play("Blues-Loop.mp3",true);
         terminal.flush();
     }
 
@@ -178,8 +188,6 @@ public class Field {
     private static boolean isPlayerAlive(Player player, List<Obstacle> rocks) {
         for(Obstacle rock : rocks) {
             if (rock.getX() == player.getX() && rock.getY() == player.getY()) {
-                MP3Player m = new MP3Player();
-                m.play("Blues-Loop.mp3", true);
                 return false;
             }
         }
@@ -192,8 +200,6 @@ public class Field {
 
         if( (rock.getX() <= player.getX()+1) && (rock.getX() >= player.getX()-1) && (rock.getY() <= player.getY()+1) && (rock.getY() >= player.getY()-1))
         {
-            MP3Player m = new MP3Player();
-            m.play("Blues-Loop.mp3", true);
             return false;
         }
 
