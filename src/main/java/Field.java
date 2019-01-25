@@ -31,18 +31,18 @@ public class Field {
 
     //Starting game.
     private static void startGame() throws IOException, InterruptedException {
-
+        MP3Player m = new MP3Player();
+        m.play("Victory.mp3");
 
         Terminal terminal = createTerminal();
-
-
 
         int chosenLevel = Menu.menu(terminal);
         terminal.clearScreen();     //Menu is removed after level is chosen and the game starts.
 
+
         int noRocks = 10*chosenLevel;
 
-        System.out.println("Enemies: "+ noRocks);
+        System.out.println("Amount of enemies: "+ noRocks);
 
         Player player = createPlayer();
 
@@ -70,6 +70,7 @@ public class Field {
         //Before printing GAME OVER!!!, Clear the screen
         terminal.clearScreen();
 
+        //m.play("Blues-Loop.mp3");
         //Logic to print GAME OVER!!! on lanterna terminal
         String str = "GAME OVER!!!!!";
         int col = 30;
@@ -145,6 +146,8 @@ public class Field {
     private static boolean isPlayerAlive(Player player, List<Obstacle> rocks) {
         for(Obstacle rock : rocks) {
             if (rock.getX() == player.getX() && rock.getY() == player.getY()) {
+                MP3Player m = new MP3Player();
+                m.play("Blues-Loop.mp3", true);
                 return false;
             }
         }
@@ -157,6 +160,7 @@ public class Field {
 
         terminal.setCursorPosition(rock.getOldX(), rock.getOldY());
         terminal.putCharacter(' ');
+        terminal.setForegroundColor(TextColor.ANSI.YELLOW);
         terminal.setCursorPosition(rock.getX(), rock.getY());
         terminal.putCharacter(rock.getSymbolObstacle());
         terminal.flush();
@@ -166,6 +170,8 @@ public class Field {
 
         terminal.setCursorPosition(player.getOldx(), player.getOldy());
         terminal.putCharacter(' ');
+        terminal.setForegroundColor(TextColor.ANSI.CYAN);
+
         terminal.setCursorPosition(player.getX(), player.getY());
         terminal.putCharacter(player.getSymbol());
 
